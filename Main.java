@@ -1,5 +1,6 @@
 package application;
 	
+import java.util.ArrayList;
 import java.util.List;
 
 import javafx.application.Application;
@@ -28,9 +29,12 @@ public class Main extends Application {
 	HBox buttonBox;
 	Button btAdd, btLoad, btSave, btStart, btSelect;
 	ComboBox<String> topicBox;
-	TableView<QuestionNode> table;
-	ObservableList<QuestionNode> record;
+	List<String> boxList = new ArrayList<>();
+	List<TopicGroup> topicList = new ArrayList<>();
+	TableView<TopicGroup> table;
+	ObservableList<TopicGroup> record;
 	Stage stage;
+	Scene scene;
 	Driver driver = new Driver();
 	
 	@Override
@@ -42,7 +46,7 @@ public class Main extends Application {
 			root.setBottom(setHBox());
 			BorderPane.setAlignment(setHBox(), Pos.CENTER);
 			
-			Scene scene = new Scene (root,400,400);
+			scene = new Scene (root,400,400);
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			
 			
@@ -69,16 +73,23 @@ public class Main extends Application {
 		return gPane;
 	}
 	 
-	private TableView<QuestionNode> setTable() {
-		table = new TableView<>();
-		record = FXCollections.observableArrayList();
-		TableColumn<QuestionNode, String> topic = new TableColumn<>("Topics");
-		topic.setMinWidth(75);
-		topic.setCellValueFactory(new PropertyValueFactory<>("topic"));
+	private TableView<TopicGroup> setTable() {
+		QuestionNode node = new QuestionNode("test", "test", "test", "test", null, 1); 
+		ArrayList<QuestionNode> testList = new ArrayList<>();
+		testList.add(node);
+		TopicGroup test = new TopicGroup("test", testList);
+		topicList.add(test);
 		
-		TableColumn<QuestionNode, String> quesNo = new TableColumn<>("Question Number");
+		table = new TableView<>();
+		record = FXCollections.observableArrayList(topicList);
+		
+		TableColumn<TopicGroup, String> topic = new TableColumn<>("Topics");
+		topic.setMinWidth(75);
+		topic.setCellValueFactory(new PropertyValueFactory<>("topicName"));
+		
+		TableColumn<TopicGroup, Integer> quesNo = new TableColumn<>("Question Number");
 		quesNo.setMinWidth(100);
-		quesNo.setCellValueFactory(new PropertyValueFactory<>("questionNo"));
+		quesNo.setCellValueFactory(new PropertyValueFactory<>("size"));
 		
 		table.setItems(record);
 		//Fix the size of column to 2 (No extra blank column)
@@ -95,9 +106,9 @@ public class Main extends Application {
 		
 		topicBox = new ComboBox<>();
 		topicBox.setPromptText("Select topic");
-//		topicBox.getItems().addAll();
 		
 		btSelect = new Button("Select");
+		btSelect.setOnAction(event -> addTable());
 		
 		vBox.getChildren().addAll(lbTopic,topicBox, btSelect);
 		vBox.setPadding(new Insets(5, 5, 5, 5));
@@ -117,25 +128,68 @@ public class Main extends Application {
 		buttonBox.setPadding(new Insets(5, 5, 5, 5));
 		buttonBox.setSpacing(5);
 		
-		btAdd.setOnAction(event -> {
-			
-		});
+		btAdd.setOnAction(event -> addQuestion());
 		btLoad.setOnAction(event-> loadFile());
-		btSave.setOnAction(null);
-		btStart.setOnAction(null);
+		btSave.setOnAction(event -> saveFile());
+		btStart.setOnAction(event -> startQuestion());
 		
 		return buttonBox;
 		
 	}
 	
+	private void addQuestion() {
+		driver.add(stage);
+	}
+	
 	private void loadFile() {
-		
 		driver.load(stage, this);
 		
 	}
 	
 	public void setComboBox(List<String> topicList) {
+		topicBox.getItems().clear();
+		for(String topic: topicList)
+			if(!boxList.contains(topic))
+				boxList.add(topic);
 		topicBox.getItems().addAll(topicList);
+	}
+	
+	public void setTopicList(List<TopicGroup> topicGroupList) {
+		for(TopicGroup tgroup : topicGroupList) {
+			if(!boxList.contains(tgroup.getTopicName()))
+				topicGroupList.add(tgroup);
+			else
+				for(int i = 0; i < topicList.size(); i ++) {
+					TopicGroup temp = topicList.get(i);
+					if(temp.getTopicName().equals(tgroup.getTopicName()))
+						topicList.get(i).addQuestionList(tgroup.getQuestionList());
+				}
+		}
+	}
+	
+	private void saveFile() {
+		driver.save(stage);
+	}
+	
+	private void startQuestion() {
+		driver.start(stage, scene);
+		
+	}
+	
+	private void addTable() {
+		ObservableList<TopicGroup> list = FXCollections.observableArrayList();
+		String topicName = topicBox.getValue();
+		TopicGroup tgroup = null;
+		for(TopicGroup temp : topicList)
+			if(temp.getTopicName().equals(topicName))
+				tgroup = temp;
+		
+		list.add(tgroup);
+		record.addAll(list);
+//		table.getItems().add(tgroup);
+//		
+//		record.add(tgroup);
+
 	}
 	
 	

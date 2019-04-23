@@ -13,29 +13,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-public class ChooseFile extends Application{
+public class ChooseFile {
 	
-	private Desktop desktop = Desktop.getDesktop();
 	private String filePath = null;
-	private boolean output = false;
-	
-//	public ChooseFile(Stage stage) {
-//		chooseFile(stage);
-//		
-//	}
-//	Stage stage = new Stage();
-	
+  
 	public ChooseFile() {
-		
-	}
-	@Override
-	public void start(Stage stage) throws Exception {
-//		while(filePath == null) {
-//			String str = chooseFile(stage);
-//			filePath = str;
-//		}
-//		while(!output)
-//		chooseFile(stage);
 		
 	}
 	
@@ -82,7 +64,7 @@ public class ChooseFile extends Application{
 			if(filePath != null) {
 //				showPath();
 //				output = true;
-				driver.setFilePath(filePath);
+//				driver.setFilePath(filePath);
 				driver.readJSON(filePath, main);
 				fileStage.close();
 				

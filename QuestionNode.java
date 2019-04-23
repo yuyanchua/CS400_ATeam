@@ -1,4 +1,6 @@
-package application;
+ package application;
+
+import java.util.Arrays;
 
 /**
  * Question Node 
@@ -24,7 +26,7 @@ public class QuestionNode {
 	}
 	
 	public QuestionNode(String metaData, String content, String topic, 
-			String image, String [] choiceContenta, int answer) {
+			String image, String [] choiceContents, int answer) {
 		setMetaData(metaData);
 		setContent(content);
 		setTopic(topic);
@@ -80,5 +82,14 @@ public class QuestionNode {
 	
 	public String getMetaData() {
 		return metaData;
+	}
+
+	@Override
+	public String toString() {
+		return "QuestionNode [content=" + content + ", topic=" + topic + ", \nchoiceContents="
+				+ Arrays.toString(choiceContents) + ", answer=" + answer + ", metaData=" + metaData + ", image=" + image
+				+ "]";
 	}	
+	
+	
 }

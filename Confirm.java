@@ -12,26 +12,16 @@ import javafx.event.EventHandler;
 import javafx.scene.control.*; 
 import javafx.stage.Stage; 
 import javafx.scene.control.Alert.AlertType; 
-public class Confirm extends Application { 
 
- // launch the application 
- public void start(Stage s) 
- { 
-     // set title for the stage 
-     s.setTitle("creating alerts"); 
-
-     // create a button 
-     Button b = new Button("Confirmation alert"); 
-
-     // create a tile pane 
-     TilePane r = new TilePane(); 
-
-     // create a alert 
-     Alert a = new Alert(AlertType.NONE); 
+public class Confirm extends Application{ 
+	
+	EventHandler<ActionEvent> event;
+	
+	public Confirm() {
+		Alert a = new Alert(AlertType.NONE);
 
      // action event 
-     EventHandler<ActionEvent> event = new 
-                      EventHandler<ActionEvent>() { 
+     event = new EventHandler<ActionEvent>() { 
          public void handle(ActionEvent e) 
          { 
              // set alert type 
@@ -42,7 +32,19 @@ public class Confirm extends Application {
              a.show(); 
          } 
      }; 
+	}
 
+ // To test the GUI without main class
+ public void start(Stage s) { 
+//	 Stage s = new Stage();
+     // set title for the stage 
+     s.setTitle("creating alerts"); 
+
+     // create a button 
+     Button b = new Button("Confirmation alert"); 
+
+     // create a tile pane 
+     TilePane r = new TilePane(); 
 
      // when button is pressed 
      b.setOnAction(event);
@@ -61,7 +63,9 @@ public class Confirm extends Application {
 
  public static void main(String args[]) 
  { 
-     // launch the application 
-     launch(args); 
+//  Confirm confirm =  new Confirm();
+//  confirm.start();
+	 launch(args);
+   
  } 
 } 

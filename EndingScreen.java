@@ -47,7 +47,7 @@ public class EndingScreen extends Application {
     	  new ExitScreen().start(primaryStage);
       });
       button2.setOnAction(event ->{
-    	  
+    	  new ExitScreen().start(primaryStage);
       });
     } catch (Exception e) {
       e.printStackTrace();
