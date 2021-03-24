@@ -1,199 +1,249 @@
-package application;
-	
-import java.util.ArrayList;
-import java.util.List;
+/////////////////// ALL ASSIGNMENTS INCLUDE THIS SECTION ///////////////////////
+// Title: Quiz Generator
+// Files: AddQuestion.java, Choice.java, ChooseDir.java, ChooseFile.java, Confirm.java,
+// DisplayResults.java, ErrorScreen.java, ExitQuizGenerator.java, ExitScreen.java, Main.java,
+// QuestionDatabase.java, QuestionDatabaseADT.java, Question.java, QuestionNode.java,
+// StartQuestionScreen.java
+//
+// Semester: Spring 2019
+// Course: CS400
+// Due Date: Before 10pm on May 2, 2019
+// Author: Yu Yan Chua(Lec 001), Yujie Wang(Lec 001), Ruiting Tong(Lec 004), Shiyu Zhu(Lec 002),
+// Yizhou Liu(Lec 002),
+// Email: ywang2327@wisc.edu, szhu227@wisc.edu, liu773@wisc.edu, ychua7@wisc.edu
+// Lecture's Name: Deb Deppeler, Andrew Kuemmel
+// Bugs: Unknown
+//////////////////// PAIR PROGRAMMERS COMPLETE THIS SECTION ///////////////////
 
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.stage.Stage;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Spinner;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
-
+/**
+ * The main application class responsible for creation of the question database and displaying the
+ * graphical user interface.
+ *
+ */
 public class Main extends Application {
-	
-	HBox buttonBox;
-	Button btAdd, btLoad, btSave, btStart, btSelect;
-	ComboBox<String> topicBox;
-	List<String> boxList = new ArrayList<>();
-	List<TopicGroup> topicList = new ArrayList<>();
-	TableView<TopicGroup> table;
-	ObservableList<TopicGroup> record;
-	Stage stage;
-	Scene scene;
-	Driver driver = new Driver();
-	
-	@Override
-	public void start(Stage primaryStage) {
-		try {
-			BorderPane root = new BorderPane();
-			
-			root.setCenter(setTopicPane());
-			root.setBottom(setHBox());
-			BorderPane.setAlignment(setHBox(), Pos.CENTER);
-			
-			scene = new Scene (root,400,400);
-			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-			
-			
-			primaryStage.setScene(scene);
-			primaryStage.setTitle("Main");
-			primaryStage.show();
-			
-			btLoad.setOnAction(event-> {
-				System.out.println("Test");
-				loadFile();
-			});
-			
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
+	private QuestionDatabase questionDB = new QuestionDatabase();
+	// for display Question used
+
+	private int totalNumQuestion = 0;
+
+	private File file;
+
+	private Label lbTitle, lbQuesNumTitle, lbQuesNum, lbRequestNum;
+	private Button btLoad, btAdd, btSave, btGenerate;
+	private ListView<String> topicList;
+	private Spinner<Integer> numSpinner;
+	private HBox buttonBox;
+	private VBox vbox;
+	private BorderPane root;
+	private GridPane gPane;
+	private Stage stage;
+	private ObservableList<String> topicName;
+	private List<String> topicNameList = new ArrayList<>();
+
+	/**
+	 * Public method to launch the primary GUI screen.
+	 */
+	public void start(Stage primaryStage) throws Exception {
+		root = new BorderPane();
+		Scene scene = new Scene(root, 500, 400);
+		topicName = FXCollections.observableArrayList(topicNameList);
+		setupInterface();
+
+		root.setPadding(new Insets(10, 10, 10, 10));
+
+		root.setTop(lbTitle);
+		root.setCenter(topicList);
+		root.setBottom(vbox);
+
+		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+		primaryStage.setScene(scene);
+		primaryStage.setTitle("Quiz Generator");
+		primaryStage.setMinHeight(400);
+		primaryStage.setMinWidth(500);
+		primaryStage.setResizable(false);
+		primaryStage.show();
 	}
-	
-	private Pane setTopicPane() {
-		GridPane gPane = new GridPane();
-		gPane.setAlignment(Pos.CENTER);
-		gPane.add(setTable(), 0, 0);
-		gPane.add(setCBox(), 1, 0);
+
+	/**
+	 * Private method to help set up look of Primary GUI.
+	 */
+	private void setupInterface() {
+		lbQuesNumTitle = new Label("TotalNumber of Questions: ");
+		lbRequestNum = new Label("Question in the quiz: ");
+		lbQuesNum = new Label(Integer.toString(totalNumQuestion));
+
+		gPane = new GridPane();
+		gPane.add(lbQuesNumTitle, 0, 0);
+		gPane.add(lbRequestNum, 0, 1);
+		gPane.add(lbQuesNum, 1, 0);
+
+		setSpinner();
+
+		vbox = new VBox();
+		vbox.setSpacing(5);
+
+		setButtonBox();
+
+		vbox.getChildren().addAll(gPane, buttonBox);
+
+		lbTitle = new Label("Choose Topic");
+
+		topicList = new ListView<String>();
+		topicList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		topicList.setMinHeight(200);
+		topicList.setItems(topicName);
 		
-		return gPane;
 	}
-	 
-	private TableView<TopicGroup> setTable() {
-		QuestionNode node = new QuestionNode("test", "test", "test", "test", null, 1); 
-		ArrayList<QuestionNode> testList = new ArrayList<>();
-		testList.add(node);
-		TopicGroup test = new TopicGroup("test", testList);
-		topicList.add(test);
-		
-		table = new TableView<>();
-		record = FXCollections.observableArrayList(topicList);
-		
-		TableColumn<TopicGroup, String> topic = new TableColumn<>("Topics");
-		topic.setMinWidth(75);
-		topic.setCellValueFactory(new PropertyValueFactory<>("topicName"));
-		
-		TableColumn<TopicGroup, Integer> quesNo = new TableColumn<>("Question Number");
-		quesNo.setMinWidth(100);
-		quesNo.setCellValueFactory(new PropertyValueFactory<>("size"));
-		
-		table.setItems(record);
-		//Fix the size of column to 2 (No extra blank column)
-		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-		table.getColumns().addAll(topic, quesNo);
-		return table;
+
+	/**
+	 * Private Helper method to set the spinner of the total question number.
+	 */
+	private void setSpinner() {
+		int initial = 0;
+		if (totalNumQuestion > 0)
+			initial = 1;
+		numSpinner = new Spinner<Integer>(0, totalNumQuestion, initial);
+		numSpinner.setEditable(true);
+		numSpinner.setMaxWidth(150);
+		gPane.add(numSpinner, 1, 1);
 	}
-	
-	
-	
-	private VBox setCBox() {
-		VBox vBox = new VBox();
-		Label lbTopic = new Label("Topic");
-		
-		topicBox = new ComboBox<>();
-		topicBox.setPromptText("Select topic");
-		
-		btSelect = new Button("Select");
-		btSelect.setOnAction(event -> addTable());
-		
-		vBox.getChildren().addAll(lbTopic,topicBox, btSelect);
-		vBox.setPadding(new Insets(5, 5, 5, 5));
-		vBox.setSpacing(5);
-		
-		return vBox;
-	}
-	
-	private HBox setHBox() {
+
+	/**
+	 * Private Helper method to set the hbox of buttons on the primary GUI.
+	 */
+	private void setButtonBox() {
 		buttonBox = new HBox();
-		btAdd = new Button("ADD");
-		btLoad = new Button("LOAD");
-		btSave = new Button("SAVE");
-		btStart = new Button("START");
-		
-		buttonBox.getChildren().addAll(btAdd, btLoad, btSave, btStart);
+
+		btLoad = new Button("Load Data");
+		btAdd = new Button("Add Question");
+		btSave = new Button("Save to File");
+		btGenerate = new Button("Generate Quiz");
+
+		buttonBox.getChildren().addAll(btLoad, btAdd, btSave, btGenerate);
 		buttonBox.setPadding(new Insets(5, 5, 5, 5));
 		buttonBox.setSpacing(5);
-		
-		btAdd.setOnAction(event -> addQuestion());
-		btLoad.setOnAction(event-> loadFile());
-		btSave.setOnAction(event -> saveFile());
-		btStart.setOnAction(event -> startQuestion());
-		
-		return buttonBox;
-		
+
+		btLoad.setOnAction(e -> new ChooseFile().chooseFile(stage, this));
+		btAdd.setOnAction(e -> displayAddQuestionForm());
+		btSave.setOnAction(e -> new ChooseDir().chooseDir(stage, this));
+		btGenerate.setOnAction(e -> displayQuestion());
 	}
-	
-	private void addQuestion() {
-		driver.add(stage);
+
+	/**
+	 * Public method to load the file when press the button and call the method.
+	 * 
+	 * @param filePath - the path of the file needs to load.
+	 */
+	public void setLoadFile(String filePath) {
+		this.file = new File(filePath);
+		questionDB.loadQuestionsFromJSON(file);
+		updateList();
 	}
-	
-	private void loadFile() {
-		driver.load(stage, this);
-		
+
+	/**
+	 * Public method to save the file when press the button and call the method.
+	 * 
+	 * @param filePath
+	 */
+	public void setSaveFile(String filePath) {
+		this.file = new File(filePath);
+		questionDB.saveQuestionsToJSON(file);
 	}
-	
-	public void setComboBox(List<String> topicList) {
-		topicBox.getItems().clear();
-		for(String topic: topicList)
-			if(!boxList.contains(topic))
-				boxList.add(topic);
-		topicBox.getItems().addAll(topicList);
+
+	/**
+	 * Private method to display the add question interface when press the button and call the method.
+	 */
+	private void displayAddQuestionForm() {
+		new AddQuestion().start(stage, this);
 	}
-	
-	public void setTopicList(List<TopicGroup> topicGroupList) {
-		for(TopicGroup tgroup : topicGroupList) {
-			if(!boxList.contains(tgroup.getTopicName()))
-				topicGroupList.add(tgroup);
-			else
-				for(int i = 0; i < topicList.size(); i ++) {
-					TopicGroup temp = topicList.get(i);
-					if(temp.getTopicName().equals(tgroup.getTopicName()))
-						topicList.get(i).addQuestionList(tgroup.getQuestionList());
+
+	/**
+	 * Public method to add Question to data base when press the button and call the method.
+	 * 
+	 * @param topic
+	 * @param question
+	 */
+	public void addQuestionToDB(String topic, Question question) {
+		questionDB.addQuestion(topic, question);
+		updateList();
+	}
+
+	/**
+	 * Public method to update the list of spinner and topic list.
+	 */
+	public void updateList() {
+		totalNumQuestion = questionDB.getNumQuestion();
+		lbQuesNum.setText(Integer.toString(totalNumQuestion));
+		setSpinner();
+		topicName = questionDB.getTopics();
+		topicList.setItems(topicName);
+	}
+
+
+	/**
+	 * Private helper method to display the question when press the button and call the method.
+	 * Throw error is the any operation goes wrong.
+	 */
+
+	private void displayQuestion() {
+		ObservableList<String> topics = topicList.getSelectionModel().getSelectedItems();
+		try {
+			if (topics.isEmpty()) {
+				throw new NumberFormatException();
+			}
+			ArrayList<Question> questionList = new ArrayList<>();
+			// Add the topic to the topic list without duplicate and in alphabetical order.
+			for (String topic : topics) {
+				ArrayList<String> metaDataList = new ArrayList<String>();
+				ArrayList<String> questionContent = new ArrayList<String>();
+				for (Question q : questionDB.getQuestions(topic)) {
+					boolean notDuplicate =
+							metaDataList.contains(q.getMetaData()) && questionContent.contains(q.getContent());
+					if (!notDuplicate) {
+						questionList.add(q);
+						metaDataList.add(q.getMetaData());
+						questionContent.add(q.getContent());
+					}
 				}
+			}
+			int questionNum = numSpinner.getValue();
+			Collections.shuffle(questionList);
+			questionList =
+					(ArrayList<Question>) questionList.stream().limit(questionNum).collect(Collectors.toList());
+			StartQuestionScreen.resetIndex();
+			new StartQuestionScreen(stage, questionList, this);
+		} catch (NumberFormatException e) {
+			new ErrorScreen().start(stage, "You selected no topics!");
 		}
 	}
-	
-	private void saveFile() {
-		driver.save(stage);
-	}
-	
-	private void startQuestion() {
-		driver.start(stage, scene);
-		
-	}
-	
-	private void addTable() {
-		ObservableList<TopicGroup> list = FXCollections.observableArrayList();
-		String topicName = topicBox.getValue();
-		TopicGroup tgroup = null;
-		for(TopicGroup temp : topicList)
-			if(temp.getTopicName().equals(topicName))
-				tgroup = temp;
-		
-		list.add(tgroup);
-		record.addAll(list);
-//		table.getItems().add(tgroup);
-//		
-//		record.add(tgroup);
 
-	}
-	
-	
+	/**
+	 * Public Main method to execute the program.
+	 * @param args
+	 */
 	public static void main(String[] args) {
-		launch(args);
+		Application.launch(args);
 	}
 }

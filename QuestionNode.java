@@ -1,95 +1,110 @@
- package application;
+/////////////////// ALL ASSIGNMENTS INCLUDE THIS SECTION ///////////////////////
+// Title: Quiz Generator(M2 GUI)
+// Files: AddQuestion.java, Choice.java, Confirm.java, DisplayResult.java,
+// ExitQuizGenerator.java, ExitScreen.java, PrimaryGUI.java,
+// Question.java, QuestionNode.java, StartQuestionScreen.java
+// Semester: Spring 2019
+// Course: CS400
+// Due Date: Before 10pm on March 19, 2019
+// Author: Yu Yan Chua(Lec 001),Yujie Wang(Lec 001) Ruiting Tong(Lec 004), Shiyu Zhu(Lec 002),
+// Yizhou Liu(Lec 002),
+// Email: ywang2327@wisc.edu szhu227@wisc.edu liu773@wisc.edu, ychua7@wisc.edu
+// Lecture's Name: Deb Deppeler,
+// Bugs: Unknown
+//////////////////// PAIR PROGRAMMERS COMPLETE THIS SECTION ///////////////////
 
-import java.util.Arrays;
+
+
+import java.util.ArrayList;
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 /**
- * Question Node 
- * 
- * @author Ruiting Tong (Tom)
+ * Object class of QuestionNode presenting each question.
+ * JavaFX elements for displaying a single Question to the user.
  *
  */
 public class QuestionNode {
-	private String content;
-	private String topic;
-	private String[] choiceContents;
-	private int answer;
-	private String metaData;
+	private VBox node;
+	private ToggleGroup choices;
 	private String image;
-	
-	public QuestionNode() {
-		content = null;
-		topic = null;
-		choiceContents = null;
-		answer = -1;
-		metaData = null;
-		image = null;
+
+	/**
+	 * Constructor of QuestionNode by taking in a question q.
+	 * @param q - the question taken.
+	 */
+	public QuestionNode(Question q) {
+		choices = new ToggleGroup();
+		node = new VBox();
+		image = q.getImage();
+		ArrayList<Choice> choiceList = (ArrayList<Choice>) q.getChoices();
+		node.getChildren().add(setTopHBox(q));
+		node.getChildren().add(setLeftVBox(choiceList));
 	}
-	
-	public QuestionNode(String metaData, String content, String topic, 
-			String image, String [] choiceContents, int answer) {
-		setMetaData(metaData);
-		setContent(content);
-		setTopic(topic);
-		setImage(image);
-		setChoiceContents(choiceContents);
-		setAnswer(answer);
-		
+
+	/**
+	 * Public accessor to node.
+	 * @return VBox 
+	 */
+	public VBox getNode() {
+		return node;
 	}
-	
-	public void setContent(String content){
-		this.content = content;
+
+	/**
+	 * Public accessor to choices.
+	 * @return ToggleGroup of choices
+	 */
+	public ToggleGroup getChoices() {
+		return choices;
 	}
-	
-	public void setTopic(String topic){
-		this.topic = topic;
+
+	/**
+	 * Private helper method to set the choiceList of the question.
+	 * @param choiceList List of choice of question
+	 * @return - the question node 
+	 */
+	private VBox setLeftVBox(ArrayList<Choice> choiceList) {
+		VBox leftVBox = new VBox();
+		int choiceNum = choiceList.size();
+		RadioButton[] btList = new RadioButton[choiceNum];
+		for (int i = 0; i < choiceNum; i++) {
+			btList[i] = new RadioButton(choiceList.get(i).getChoice());
+			btList[i].setToggleGroup(choices);
+		}
+		// go through the choice list
+		for (int i = 0; i < choiceNum; i++) {
+			leftVBox.getChildren().addAll(btList[i]);
+		}
+
+		leftVBox.setPadding(new Insets(5, 5, 5, 5));
+		leftVBox.setSpacing(5);
+		return leftVBox;
 	}
-	
-	public void setChoiceContents(String[] choiceContents) {
-		this.choiceContents = choiceContents;
+
+	/**
+	 * Private helper method to set the top box be the question content.
+	 * @param q Question
+	 * @return the hbox for displaying question.
+	 */
+	private HBox setTopHBox(Question q) {
+		HBox contentBox = new HBox();
+		Label label = new Label(q.getContent());
+		label.setWrapText(true);
+		contentBox.getChildren().add(label);
+		contentBox.setPadding(new Insets(5, 5, 5, 5));
+		return contentBox;
 	}
-	
-	public void setAnswer(int index) {
-		this.answer = index;
-	}
-	
-	public void setImage(String image) {
-		this.image = image;
-	}
-	
-	public void setMetaData(String metaData) {
-		this.metaData = metaData;
-	}
-	
-	public String getContent(){
-		return content;
-	}
-	
-	public String getTopic(){
-		return topic;
-	}
-	
-	public int getAnswer() {
-		return answer;
-	}
-	
-	public String[] getChoiceContents() {
-		return choiceContents;
-	}
-	
+
+	/**
+	 * Public method to show the image.
+	 * @return file path of image
+	 */
 	public String getImage() {
 		return image;
 	}
-	
-	public String getMetaData() {
-		return metaData;
-	}
 
-	@Override
-	public String toString() {
-		return "QuestionNode [content=" + content + ", topic=" + topic + ", \nchoiceContents="
-				+ Arrays.toString(choiceContents) + ", answer=" + answer + ", metaData=" + metaData + ", image=" + image
-				+ "]";
-	}	
-	
-	
 }
